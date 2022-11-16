@@ -34,24 +34,24 @@ class _TodoListPageState extends State<TodoListPage> {
       ),
       body: Visibility(
         visible: isLoading,
-        child: Center(child: CircularProgressIndicator()),
         replacement: RefreshIndicator(
           onRefresh: fetchTodo,
           child: Visibility(
             visible: items.isNotEmpty,
-            replacement: Center(child: Text("No Todo Item")),
+            replacement: const Center(child: Text("No Todo Item")),
             child: ListView.builder(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index] as Map;
                 final id = item['_id'] as String;
-                return TodoCard(index: index, item: item, navigateEdit: navigateToEditPage, deleteById: deleteById,
+                return TodoCard(id: id, index: index, item: item, navigateEdit: navigateToEditPage, deleteById: deleteById,
                 );
               },
             ),
           ),
         ),
+        child: const Center(child: CircularProgressIndicator()),
       ),
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {

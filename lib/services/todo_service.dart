@@ -18,7 +18,6 @@ class TodoService {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as Map;
       final result = json['items'] as List;
-      print(result);
       return result;
     } else {
       return null;
