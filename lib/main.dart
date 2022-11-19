@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/screens/splash_screen.dart';
 import 'package:todo_list/screens/todo_list.dart';
 
 void main() {
@@ -13,8 +14,20 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Flutter Todo List",
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: TodoListPage(),
+      theme: ThemeClass.darkTheme,
+      home: const SplashScreen(),
     );
   }
+}
+
+//Make dark theme
+class ThemeClass {
+  static ThemeData darkTheme = ThemeData.dark().copyWith(
+    textTheme: ThemeData.dark().textTheme.apply(
+      fontFamily: 'BreeSerif',
+    ),
+    primaryTextTheme: ThemeData.dark().textTheme.apply(
+      fontFamily: 'BreeSerif',
+    ),
+  );
 }

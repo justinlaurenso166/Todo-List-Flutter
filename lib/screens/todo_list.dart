@@ -1,12 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/services.dart';
 import 'package:todo_list/screens/add_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:todo_list/screens/history.dart';
 import 'package:todo_list/services/todo_service.dart';
-import 'package:todo_list/widget/todo_card.dart';
+import 'package:todo_list/widget/todo_card_stful.dart';
 import '../utils/snackbar_helpers.dart';
 
 class TodoListPage extends StatefulWidget {
@@ -29,36 +32,126 @@ class _TodoListPageState extends State<TodoListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Todo List App"),
-      ),
-      body: Visibility(
-        visible: isLoading,
-        replacement: RefreshIndicator(
-          onRefresh: fetchTodo,
-          child: Visibility(
-            visible: items.isNotEmpty,
-            replacement: const Center(child: Text("No Todo Item")),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index] as Map;
-                final id = item['_id'] as String;
-                return TodoCard(id: id, index: index, item: item, navigateEdit: navigateToEditPage, deleteById: deleteById,
-                );
-              },
-            ),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              const DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                  ),
+                  child: Center(
+                    child: Text(
+                      "TODO LIST",
+                      style: TextStyle(
+                        fontSize: 30,
+                        letterSpacing: 5,
+                        color: Color.fromRGBO(255, 212, 1, 1),
+                      ),
+                    ),
+                  )),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text(
+                  'History',
+                  style: TextStyle(fontSize: 20),
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  final route = MaterialPageRoute(
+                    builder: (context) => History(),
+                  );
+                  Navigator.pop(context);
+                  Navigator.push(context, route);
+                  // Then close the drawer
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text(
+                  'Settings',
+                  style: TextStyle(fontSize: 20),
+                ),
+                onTap: () {
+                  // Update the state of the app
+                  // ...
+                  // Then close the drawer
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
         ),
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
+        appBar: AppBar(
+          title: const Text(
+            "TODO LIST APP",
+            style: TextStyle(
+                color: Color.fromRGBO(255, 212, 1, 1),
+                fontFamily: 'BreeSerif',
+                letterSpacing: 1.5),
+          ),
+        ),
+        body: Visibility(
+          visible: isLoading,
+          replacement: RefreshIndicator(
+            onRefresh: fetchTodo,
+            child: Visibility(
+              visible: items.isNotEmpty,
+              replacement: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Image(
+                      image: AssetImage("assets/images/NoData.png"),
+                    ),
+                    const Text("No Task Available",
+                      style: TextStyle(fontSize: 20, letterSpacing: 2))
+                ],
+              )),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index] as Map;
+                  final id = item['_id'] as String;
+                  return TodoCard(
+                    id: id,
+                    index: index,
+                    item: item,
+                    navigateEdit: navigateToEditPage,
+                    deleteById: deleteById,
+                  );
+                },
+              ),
+            ),
+          ),
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             navigateToAddPage();
           },
-          label: const Text("Add")),
+          backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
+          label: const Icon(Icons.add, size: 25.0),
+        ));
+  }
+
+  Future<void> navigateToTodo() async {
+    final route = MaterialPageRoute(
+      builder: (context) => TodoListPage(),
     );
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchTodo();
+  }
+
+  Future<void> navigateToHistory() async {
+    final route = MaterialPageRoute(
+      builder: (context) => History(),
+    );
+    await Navigator.push(context, route);
   }
 
   Future<void> navigateToAddPage() async {

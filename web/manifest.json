@@ -1,6 +1,6 @@
 {
-    "name": "my_app",
-    "short_name": "my_app",
+    "name": "Todo List App",
+    "short_name": "todo_list",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
@@ -8,14 +8,13 @@
     "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
-    "icons": [
-        {
-            "src": "icons/Icon-192.png",
+    "icons": [{
+            "src": "icons/TodoList200.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "icons/Icon-512.png",
+            "src": "icons/TodoList.png",
             "sizes": "512x512",
             "type": "image/png"
         },
