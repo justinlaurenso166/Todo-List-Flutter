@@ -77,7 +77,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
     if (date != null) {
       final time = await showTimePicker(
           context: context,
-          initialTime: TimeOfDay.fromDateTime(_date ?? DateTime.now()),
+          initialTime: TimeOfDay.fromDateTime(_date),
           builder: (BuildContext context, child) {
             return MediaQuery(
               data:
