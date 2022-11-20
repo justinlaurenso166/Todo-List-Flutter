@@ -3,18 +3,24 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:todo_list/utils/snackbar_helpers.dart';
 
+import '../services/todo_service.dart';
+
 class TodoCard extends StatefulWidget {
   final int index;
   final Map item;
   final Function(Map) navigateEdit;
   final Function(String) deleteById;
+  final Function fetchTodo;
   final String id;
+  final String page;
   const TodoCard(
       {super.key,
       required this.index,
       required this.item,
       required this.navigateEdit,
       required this.deleteById,
+      required this.fetchTodo,
+      required this.page,
       required this.id});
 
   @override
@@ -29,65 +35,156 @@ class _TodoCardState extends State<TodoCard> {
     String id = widget.id;
 
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(backgroundColor: const Color.fromRGBO(255, 212, 1, 1),child: Text('${index + 1}'),),
-        title: Text(widget.item['title'], style: const TextStyle(fontSize: 20),),
-        subtitle: Text(item['description'], style: const TextStyle(fontSize: 15),),
-        trailing: PopupMenuButton(onSelected: (value) {
-          if (value == 'edit') {
-            //open edit
-            widget.navigateEdit(item);
-          } else if (value == 'delete') {
-            //open delete
-            showDialog(
-              context: context,
-              builder: (BuildContext context) => _buildPopupDialogDelete(context, id, widget.deleteById, item),
-            );
-          }
-        }, itemBuilder: (context) {
-          return [
-            const PopupMenuItem(
-              value: 'edit',
-              child: Text('Edit'),
+      child: Column(
+        children: [
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: item['priority'] == "MEDIUM"
+                  ? const Color.fromRGBO(255, 212, 1, 1)
+                  : item['priority'] == "HIGH"
+                      ? Colors.redAccent
+                      : Colors.green,
+              child: Text(
+                item['priority'].toString().substring(0, 1),
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Text('Delete'),
+            title: Text(
+              widget.item['todo'],
+              style: const TextStyle(fontSize: 20),
             ),
-          ];
-        }),
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) => _buildPopupDialog(context, item, changeStatus),
-          );
-        },
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['description'],
+                  style: const TextStyle(fontSize: 15),
+                ),
+              ],
+            ),
+            trailing: PopupMenuButton(onSelected: (value) {
+              if (value == 'edit') {
+                //open edit
+                widget.navigateEdit(item);
+              } else if (value == 'delete') {
+                //open delete
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => _buildPopupDialogDelete(
+                      context, id, widget.deleteById, item),
+                );
+              }
+            }, itemBuilder: (context) {
+              return widget.page == "Todo"
+                  ? [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Text('Edit'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Text('Delete'),
+                      ),
+                    ]
+                  : [
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Text('Delete'),
+                      ),
+                    ];
+            }),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => _buildPopupDialog(
+                    context,
+                    item,
+                    changeStatusComplete,
+                    changeStatusNotComplete,
+                    widget.page),
+              );
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                  "${DateTime.parse(item['date']).toString().substring(0, 10)} ${DateTime.parse(item['date']).toString().substring(11, 16)}"),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                item['status'] == false ? "Not Complete" : "Complete",
+                style: TextStyle(
+                    color: item["status"] == false
+                        ? Color.fromARGB(255, 243, 97, 87)
+                        : Colors.greenAccent),
+              ),
+              const SizedBox(width: 10),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          )
+        ],
       ),
     );
   }
 
-  void changeStatus(){
+  Future<void> updateData() async {
+    final todo = widget.item;
+    if (todo == null) {
+      print("You can not call updated without todo data");
+      return;
+    }
+    final id = todo['id'];
+    final response = await TodoService.updateTodo(id, todo);
+
+    if (response) {
+      widget.fetchTodo();
+    }
+  }
+
+  void changeStatusComplete() {
     setState(() {
-      widget.item['is_completed'] = !widget.item['is_completed'];
+      widget.item['status'] = true;
     });
-    showSuccessMessage(context, message: "Task is completed");
+    // print(widget.item);
+    updateData();
+  }
+
+  void changeStatusNotComplete() {
+    setState(() {
+      widget.item['status'] = false;
+    });
+    // print(widget.item);
+    updateData();
   }
 }
 
-Widget _buildPopupDialog(BuildContext context, Map item, Function changeStatus) {
+Widget _buildPopupDialog(
+    BuildContext context,
+    Map item,
+    Function changeStatusComplete,
+    Function changeStatusNotComplete,
+    String page) {
   return AlertDialog(
-    title: const Text('Are you finished with this task ?'),
+    title: Text(page == 'Todo'
+        ? 'Are you done with this task ?'
+        : 'Are you sure want to undone this task ?'),
     content: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(item['title']),
+        Text(item['todo']),
       ],
     ),
     actions: <Widget>[
       ElevatedButton(
         onPressed: () {
-          changeStatus();
+          page == "History"
+              ? changeStatusNotComplete()
+              : changeStatusComplete();
           Navigator.of(context).pop();
         },
         child: const Text('Yes'),
@@ -103,15 +200,33 @@ Widget _buildPopupDialog(BuildContext context, Map item, Function changeStatus) 
   );
 }
 
-Widget _buildPopupDialogDelete(BuildContext context, String id, Function deleteById, Map item){
+Widget _buildPopupDialogDelete(
+    BuildContext context, String id, Function deleteById, Map item) {
+  var parsedDate = DateTime.parse(item['date']);
   return AlertDialog(
     title: const Text('Are you sure want to delete this task ?'),
     content: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text("Title : " + item['title']),
-        Text("Description : " + item['title']),
+        Text("Title : ${item['todo']}"),
+        Text("Description : ${item['description']}"),
+        Text(
+            "Date : ${parsedDate.toString().substring(0, 10)} ${parsedDate.toString().substring(11, 16)}"),
+        Row(
+          children: [
+            const Text(
+              "Status : ",
+            ),
+            Text(
+              item['status'] == false ? "Not Complete" : "Complete",
+              style: TextStyle(
+                  color: item["status"] == false
+                      ? const Color.fromARGB(255, 243, 97, 87)
+                      : Colors.greenAccent),
+            ),
+          ],
+        )
       ],
     ),
     actions: <Widget>[

@@ -113,13 +113,15 @@ class _TodoListPageState extends State<TodoListPage> {
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index] as Map;
-                  final id = item['_id'] as String;
+                  final id = item['id'] as String;
                   return TodoCard(
                     id: id,
                     index: index,
                     item: item,
                     navigateEdit: navigateToEditPage,
                     deleteById: deleteById,
+                    fetchTodo: fetchTodo,
+                    page: "Todo",
                   );
                 },
               ),
@@ -145,13 +147,6 @@ class _TodoListPageState extends State<TodoListPage> {
       isLoading = true;
     });
     fetchTodo();
-  }
-
-  Future<void> navigateToHistory() async {
-    final route = MaterialPageRoute(
-      builder: (context) => History(),
-    );
-    await Navigator.push(context, route);
   }
 
   Future<void> navigateToAddPage() async {
@@ -180,7 +175,7 @@ class _TodoListPageState extends State<TodoListPage> {
     //Delete the task
     final isSuccess = await TodoService.deleteById((id));
     if (isSuccess) {
-      final filtered = items.where((element) => element['_id'] != id).toList();
+      final filtered = items.where((element) => element['id'] != id).toList();
       setState(() {
         items = filtered;
       });
@@ -193,6 +188,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Future<void> fetchTodo() async {
     final response = await TodoService.fetchTodos();
     if (response != null) {
+      print(response);
       setState(() {
         items = response;
       });

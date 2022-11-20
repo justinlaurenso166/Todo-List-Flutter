@@ -5,19 +5,34 @@ import 'package:http/http.dart' as http;
 //All api call
 class TodoService {
   static Future<bool> deleteById(String id) async {
-    final url = 'https://api.nstack.in/v1/todos/$id';
+    final url = 'http://localhost:8080/todos/$id';
     final uri = Uri.parse(url);
     final response = await http.delete(uri);
     return response.statusCode == 200;
   }
 
   static Future<List?> fetchTodos() async {
-    final url = 'https://api.nstack.in/v1/todos?page=1&limit=10';
+    final url = 'http://localhost:8080/todos/uncompleted';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
+    print(response);
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as Map;
-      final result = json['items'] as List;
+      final result = json['data'] as List;
+      return result;
+    } else {
+      return null;
+    }
+  }
+
+  static Future<List?> fetchTodosCompleted() async {
+    final url = 'http://localhost:8080/todos/completed';
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
+    print(response);
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body) as Map;
+      final result = json['data'] as List;
       return result;
     } else {
       return null;
@@ -25,9 +40,9 @@ class TodoService {
   }
 
   static Future<bool> updateTodo(String id, Map body) async {
-    final url = 'https://api.nstack.in/v1/todos/$id'; //post api
+    final url = 'http://localhost:8080/todos/$id'; //post api
         final uri = Uri.parse(url);
-        final response = await http.put(
+        final response = await http.patch(
           uri, 
           body: jsonEncode(body),
           headers: {
@@ -38,7 +53,7 @@ class TodoService {
   }
 
   static Future<bool> addTodo(Map body) async {
-    final url = 'https://api.nstack.in/v1/todos'; //post api
+    final url = 'http://localhost:8080/todos'; //post api
         final uri = Uri.parse(url);
         final response = await http.post(
           uri, 
@@ -47,6 +62,6 @@ class TodoService {
             'Content-Type': 'application/json'
         }
     );
-    return response.statusCode == 201;
+    return response.statusCode == 200;
   }
 }

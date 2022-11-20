@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -26,13 +27,16 @@ class _AddTodoPageState extends State<AddTodoPage> {
   TextEditingController descriptionController = TextEditingController();
 
   bool isEdit = false;
-  final List<String> _priorities = ['Low', 'Medium', 'High'];
+  final List<String> _priorities = ['LOW', 'MEDIUM', 'HIGH'];
   late String _priority = _priorities[0];
   DateTime _date = DateTime.now();
   final TextEditingController _dateController = TextEditingController();
-  final DateFormat _dateFormatter = DateFormat('MMM dd, yyyy');
+  final DateFormat _dateFormatter = DateFormat("yyyy-MM-dd HH:mm");
   bool isLoading = true;
   List items = [];
+  String? isoDate;
+  bool _validateTask = false;
+  bool _validateDesc = false;
 
   @override
   void initState() {
@@ -40,14 +44,26 @@ class _AddTodoPageState extends State<AddTodoPage> {
     final todo = widget.todo;
     if (todo != null) {
       isEdit = true;
-      final title = todo['title'];
+      final title = todo['todo'];
       final description = todo['description'];
-      // final date = todo['date'];
-      // final priority = todo['priority'];
+      final date = todo['date'];
+      final priority = todo['priority'];
       titleController.text = title;
       descriptionController.text = description;
-      // _dateController.text = date;
-      // _priority = priority;
+      isoDate = date;
+      _priority = priority;
+
+      var parsedDate = DateTime.parse(todo['date']);
+      _dateController.text =
+          "${parsedDate.toString().substring(0, 10)} ${parsedDate.toString().substring(11, 16)}";
+    }else{
+      String nowDate = _date.toString();
+      DateTime nt = DateTime.parse(nowDate);
+
+      final convertToUTC = DateTime.utc(
+          nt.year, nt.month, nt.day, nt.hour, nt.minute, nt.second);
+      final iso = convertToUTC.toIso8601String();
+      isoDate = iso;
     }
   }
 
@@ -58,11 +74,40 @@ class _AddTodoPageState extends State<AddTodoPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (date != null && date != _date) {
+    if (date != null) {
+      final time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(_date ?? DateTime.now()),
+          builder: (BuildContext context, child) {
+            return MediaQuery(
+              data:
+                  MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+              child: child ?? Container(),
+            );
+          });
+      String oldDateStr = _dateFormatter.format(date).substring(0, 10);
+      List firstSplit = time.toString().split("TimeOfDay");
+      List secondSplit = firstSplit[1].toString().split("(");
+      List thirdSplit = secondSplit[1].toString().split(")");
+      String oldTimeStr = thirdSplit[0].toString();
+
+      String newDate = ("$oldDateStr $oldTimeStr:00.000");
+      DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
+      DateTime nt = DateTime.parse(newDate);
+
+      final convertToUTC = DateTime.utc(
+          nt.year, nt.month, nt.day, nt.hour, nt.minute, nt.second);
+      final iso = convertToUTC.toIso8601String();
+      isoDate = iso;
+
+      // return time;
       setState(() {
-        _date = date;
+        _date = nt;
       });
-      _dateController.text = _dateFormatter.format(date);
+      _dateController.text = formatter.format(nt);
+    }
+    {
+      _date = DateTime.now();
     }
   }
 
@@ -72,113 +117,138 @@ class _AddTodoPageState extends State<AddTodoPage> {
       appBar: AppBar(
         title: Text(isEdit ? "Edit Todo" : "Add Todo"),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          TextField(
-            controller: titleController,
-            decoration: InputDecoration(
-              labelText: 'Task Name',
-              hintText: 'Enter Task',
-              labelStyle: const TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+      body: Form(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            TextFormField(
+              controller: titleController,
+              decoration: InputDecoration(
+                labelText: 'Task Name',
+                hintText: 'Enter Task',
+                errorText: _validateTask ? 'Task Can\'t Be Empty' : null,
+                labelStyle: const TextStyle(fontSize: 18.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextField(
-            controller: descriptionController,
-            decoration: InputDecoration(
-              labelText: 'Task Description',
-              hintText: 'Enter Task Description',
-              labelStyle: const TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: descriptionController,
+              decoration: InputDecoration(
+                labelText: 'Task Description',
+                hintText: 'Enter Task Description',
+                errorText: _validateDesc ? 'Desc Can\'t Be Empty' : null,
+                labelStyle: const TextStyle(fontSize: 18.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              keyboardType: TextInputType.multiline,
+              minLines: 5,
+              maxLines: 8,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            DropdownButtonFormField(
+              isDense: true,
+              icon: const Icon(Icons.arrow_drop_down_circle),
+              iconSize: 22.0,
+              iconEnabledColor: Theme.of(context).primaryColor,
+              items: _priorities.map((String priority) {
+                return DropdownMenuItem(
+                  value: priority,
+                  child: Text(
+                    priority,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                );
+              }).toList(),
+              style: const TextStyle(fontSize: 18.0),
+              decoration: InputDecoration(
+                labelText: 'Priority',
+                labelStyle: const TextStyle(fontSize: 18.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              validator: (input) =>
+                  // ignore: unnecessary_null_comparison
+                  _priority == null ? 'Please select a priority level' : null,
+              onChanged: (value) {
+                setState(() {
+                  _priority = value.toString();
+                });
+              },
+              value: _priority,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              readOnly: true,
+              controller: _dateController,
+              style: const TextStyle(fontSize: 18.0),
+              onTap: _handleDatePicker,
+              decoration: InputDecoration(
+                labelText: "Select Date",
+                labelStyle: const TextStyle(fontSize: 18.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
               ),
             ),
-            keyboardType: TextInputType.multiline,
-            minLines: 5,
-            maxLines: 8,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          DropdownButtonFormField(
-            isDense: true,
-            icon: const Icon(Icons.arrow_drop_down_circle),
-            iconSize: 22.0,
-            iconEnabledColor: Theme.of(context).primaryColor,
-            items: _priorities.map((String priority) {
-              return DropdownMenuItem(
-                value: priority,
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: (){
+                  setState(() {
+                    titleController.text.isEmpty ? _validateTask = true : _validateTask = false;
+                    descriptionController.text.isEmpty ? _validateDesc = true : _validateDesc = false;
+                  });
+                    if(!_validateDesc && !_validateTask && isEdit){
+                      updateData();
+                    }else if(!_validateDesc && !_validateTask && !isEdit){
+                      submitData();
+                    }else {
+                      null;
+                    }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
                 child: Text(
-                  priority,
+                  !isEdit ? "Submit" : "Update",
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
+                    fontSize: 18,
+                    color: Colors.black,
                   ),
                 ),
-              );
-            }).toList(),
-            style: const TextStyle(fontSize: 18.0),
-            decoration: InputDecoration(
-              labelText: 'Priority',
-              labelStyle: const TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
               ),
             ),
-            validator: (input) =>
-                // ignore: unnecessary_null_comparison
-                _priority == null ? 'Please select a priority level' : null,
-            onChanged: (value) {
-              setState(() {
-                _priority = value.toString();
-              });
-            },
-            value: _priority,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextFormField(
-            readOnly: true,
-            controller: _dateController,
-            style: const TextStyle(fontSize: 18.0),
-            onTap: _handleDatePicker,
-            decoration: InputDecoration(
-              labelText: 'Date',
-              labelStyle: const TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
-            onPressed: !isEdit ? submitData : updateData,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Text(
-                !isEdit ? "Submit" : "Update",
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  navigateToDoPage() async {
+    var duration = const Duration(seconds: 3);
+    return Timer(duration, () {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) {
+        return const TodoListPage();
+      }));
+    });
   }
 
   Future<void> updateData() async {
@@ -187,11 +257,12 @@ class _AddTodoPageState extends State<AddTodoPage> {
       print("you can not call updated without todo data");
       return;
     }
-    final id = todo['_id'];
+    final id = todo['id'];
     final response = await TodoService.updateTodo(id, body);
 
     if (response) {
       showSuccessMessage(context, message: 'Update Success');
+      navigateToDoPage();
     } else {
       showErrorMessage(context, message: 'Update Failed');
     }
@@ -201,10 +272,12 @@ class _AddTodoPageState extends State<AddTodoPage> {
     // Get the data from form
     print(body);
     final response = await TodoService.addTodo(body);
-    // // Show success or fail message based on status
+    // // // Show success or fail message based on status
     if (response) {
       titleController.text = '';
       descriptionController.text = '';
+      _dateController.text = '';
+      _priority = _priorities[0];
       showSuccessMessage(context, message: 'Success');
     } else {
       showErrorMessage(context, message: 'Failed');
@@ -212,16 +285,16 @@ class _AddTodoPageState extends State<AddTodoPage> {
   }
 
   Map get body {
-    final title = titleController.text;
+    final todo = titleController.text;
     final description = descriptionController.text;
     final date = _dateController.text;
     final priority = _priority;
     return {
-      "title": title,
+      "todo": todo,
       "description": description,
-      "is_completed": false,
+      "status": false,
       "priority": priority,
-      "date": date,
+      "date": isoDate != null ? isoDate : "",
     };
   }
 }
