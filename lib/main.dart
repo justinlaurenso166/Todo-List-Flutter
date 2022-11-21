@@ -24,10 +24,11 @@ class MyApp extends StatelessWidget {
 class ThemeClass {
   static ThemeData darkTheme = ThemeData.dark().copyWith(
     textTheme: ThemeData.dark().textTheme.apply(
-      fontFamily: 'BreeSerif',
+      fontFamily: 'Airbnb',
     ),
     primaryTextTheme: ThemeData.dark().textTheme.apply(
-      fontFamily: 'BreeSerif',
+      fontFamily: 'Airbnb',
     ),
+    splashColor: Colors.transparent,
   );
 }

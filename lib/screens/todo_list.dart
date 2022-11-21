@@ -22,6 +22,13 @@ class TodoListPage extends StatefulWidget {
 class _TodoListPageState extends State<TodoListPage> {
   bool isLoading = true;
   List items = [];
+  List<String> dropDown = <String>[
+    "Default",
+    "A-Z",
+    "Z-A",
+    "LOW-HIGH",
+    "HIGH-LOW"
+  ];
 
   @override
   void initState() {
@@ -82,14 +89,74 @@ class _TodoListPageState extends State<TodoListPage> {
           ),
         ),
         appBar: AppBar(
-          title: const Text(
-            "TODO LIST APP",
-            style: TextStyle(
-                color: Color.fromRGBO(255, 212, 1, 1),
-                fontFamily: 'BreeSerif',
-                letterSpacing: 1.5),
-          ),
-        ),
+            title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "TODO LIST APP",
+              style: TextStyle(
+                  color: Color.fromRGBO(255, 212, 1, 1),
+                  fontFamily: 'Airbnb',
+                  letterSpacing: 1.5),
+            ),
+            Theme(
+                data: ThemeData(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                ),
+                child: DropdownButton(
+                  underline: Container(),
+                  icon: Icon(
+                    Icons.sort,
+                    color: Colors.white,
+                  ),
+                  // value: selectedValue,
+                  items: dropDown.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (Object? value) {
+                    var sortResult;
+                    setState((){
+                    isLoading = true;
+                      if (value == "A-Z") {
+                        items.sort((a, b) {
+                          return a['todo']
+                              .toLowerCase()
+                              .compareTo(b['todo'].toLowerCase());
+                        });
+                      isLoading = false;
+                      }else if(value == "Z-A"){
+                        items.sort((a, b) {
+                          return b['todo']
+                              .toLowerCase()
+                              .compareTo(a['todo'].toLowerCase());
+                        });
+                        print(items);
+                      isLoading = false;
+                      }else if(value == "LOW-HIGH"){
+                        items.sort((a, b) {
+                          return b['priority'].compareTo(a['priority']);
+                        });
+                        isLoading = false;
+                      }
+                      else if(value == "HIGH-LOW"){
+                        items.sort((a,b) {
+                          return a['priority'].compareTo(b['priority']);
+                        });
+                        isLoading = false;
+                      }
+                      else{
+                        fetchTodo();
+                      }
+                    });
+                  },
+                )),
+          ],
+        )),
         body: Visibility(
           visible: isLoading,
           replacement: RefreshIndicator(
@@ -97,14 +164,14 @@ class _TodoListPageState extends State<TodoListPage> {
             child: Visibility(
               visible: items.isNotEmpty,
               replacement: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  // ignore: prefer_const_literals_to_create_immutables
-                  children: [
-                    const Image(
-                      image: AssetImage("assets/images/NoData.png"),
-                    ),
-                    const Text("No Task Available",
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                // ignore: prefer_const_literals_to_create_immutables
+                children: [
+                  const Image(
+                    image: AssetImage("assets/images/NoData.png"),
+                  ),
+                  const Text("No Task Available",
                       style: TextStyle(fontSize: 20, letterSpacing: 2))
                 ],
               )),
@@ -188,7 +255,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Future<void> fetchTodo() async {
     final response = await TodoService.fetchTodos();
     if (response != null) {
-      print(response);
+      // print(response);
       setState(() {
         items = response;
       });

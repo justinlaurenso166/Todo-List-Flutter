@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_list/utils/snackbar_helpers.dart';
 
 import '../services/todo_service.dart';
@@ -33,21 +34,32 @@ class _TodoCardState extends State<TodoCard> {
     int index = widget.index;
     Map item = widget.item;
     String id = widget.id;
+    DateTime date = DateTime.parse(item['date']);
 
     return Card(
       child: Column(
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundColor: item['priority'] == "MEDIUM"
+              backgroundColor: item['priority'] == 1
                   ? const Color.fromRGBO(255, 212, 1, 1)
-                  : item['priority'] == "HIGH"
+                  : item['priority'] == 0
                       ? Colors.redAccent
                       : Colors.green,
-              child: Text(
-                item['priority'].toString().substring(0, 1),
-                style: const TextStyle(color: Colors.black),
-              ),
+              // backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
+              child:
+                  Text(
+                  item['priority'] == 1
+                  ? "M"
+                  : item['priority'] == 0
+                      ? "H"
+                      : "L",
+                    style: const TextStyle(color: Colors.black),
+                  ),
+              //     Text(
+              //   "${index + 1}",
+              //   style: const TextStyle(color: Colors.black),
+              // ),
             ),
             title: Text(
               widget.item['todo'],
@@ -109,7 +121,8 @@ class _TodoCardState extends State<TodoCard> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Text(
-                  "${DateTime.parse(item['date']).toString().substring(0, 10)} ${DateTime.parse(item['date']).toString().substring(11, 16)}"),
+                "${changeFormat(date)} ${date.hour}:${date.minute}"
+              ),
               const SizedBox(
                 width: 10,
               ),
@@ -129,6 +142,10 @@ class _TodoCardState extends State<TodoCard> {
         ],
       ),
     );
+  }
+
+  changeFormat(date){
+    return DateFormat("MMMEd").format(date);
   }
 
   Future<void> updateData() async {

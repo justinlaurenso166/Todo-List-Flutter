@@ -11,11 +11,17 @@ class TodoService {
     return response.statusCode == 200;
   }
 
+  static Future<bool> clearAllHistory() async {
+    final url = 'http://localhost:8080/todos/clear/completed';
+    final uri = Uri.parse(url);
+    final response = await http.delete(uri);
+    return response.statusCode == 200;
+  }
+
   static Future<List?> fetchTodos() async {
     final url = 'http://localhost:8080/todos/uncompleted';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
-    print(response);
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as Map;
       final result = json['data'] as List;
@@ -29,7 +35,6 @@ class TodoService {
     final url = 'http://localhost:8080/todos/completed';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
-    print(response);
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as Map;
       final result = json['data'] as List;

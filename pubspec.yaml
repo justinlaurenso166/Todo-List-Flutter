@@ -95,6 +95,9 @@ flutter:
     - family: BreeSerif
       fonts:
         - asset: assets/font/Bree_Serif/BreeSerif-Regular.ttf
+    - family: Airbnb
+      fonts:
+        - asset: assets/font/Airbnb/AirbnbCereal_W_Md.otf
 
   assets:
     - assets/images/

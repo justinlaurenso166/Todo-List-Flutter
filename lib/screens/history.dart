@@ -41,7 +41,10 @@ class _HistoryState extends State<History> {
           ),
           title: const Text(
             "History",
-          ),
+            style: TextStyle(
+                fontFamily: 'Airbnb',
+            ) ,
+            ),
           automaticallyImplyLeading: false,
         ),
         body: Visibility(
@@ -83,8 +86,48 @@ class _HistoryState extends State<History> {
           ),
           child: const Center(child: CircularProgressIndicator()),
         ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) => _buildPopupDialog(context),
+              );
+          },
+          backgroundColor: const Color.fromARGB(255, 243, 97, 87),
+          label: const Icon(Icons.delete_forever, size: 25.0, color: Colors.white,),
+        )
       );
   }
+
+  Widget _buildPopupDialog(
+    BuildContext context) {
+  return AlertDialog(
+    title: Text("Are you sure want to clear the history ?"),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text("This action cannot be undone."),
+      ],
+    ),
+    actions: <Widget>[
+      ElevatedButton(
+        onPressed: () {
+          clearAllHistory();
+          Navigator.of(context).pop();
+        },
+        child: const Text('Yes'),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+        child: const Text('No'),
+      ),
+    ],
+  );
+}
 
   Future<void> navigateToTodo() async {
     final route = MaterialPageRoute(
@@ -97,15 +140,12 @@ class _HistoryState extends State<History> {
     fetchTodo();
   }
 
-  Future<void> navigateToAddPage() async {
-    final route = MaterialPageRoute(
-      builder: (context) => AddTodoPage(),
-    );
-    await Navigator.push(context, route);
-    setState(() {
-      isLoading = true;
-    });
-    fetchTodo();
+  Future<void> clearAllHistory() async {
+      final isCleared = await TodoService.clearAllHistory();
+
+      if(isCleared){
+        fetchTodo();
+      }
   }
 
   Future<void> navigateToEditPage(Map item) async {

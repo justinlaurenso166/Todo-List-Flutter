@@ -27,8 +27,8 @@ class _AddTodoPageState extends State<AddTodoPage> {
   TextEditingController descriptionController = TextEditingController();
 
   bool isEdit = false;
-  final List<String> _priorities = ['LOW', 'MEDIUM', 'HIGH'];
-  late String _priority = _priorities[0];
+  final List<int> _priorities = [2, 1, 0];
+  late int _priority = _priorities[0];
   DateTime _date = DateTime.now();
   final TextEditingController _dateController = TextEditingController();
   final DateFormat _dateFormatter = DateFormat("yyyy-MM-dd HH:mm");
@@ -56,7 +56,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
       var parsedDate = DateTime.parse(todo['date']);
       _dateController.text =
           "${parsedDate.toString().substring(0, 10)} ${parsedDate.toString().substring(11, 16)}";
-    }else{
+    } else {
       String nowDate = _date.toString();
       DateTime nt = DateTime.parse(nowDate);
 
@@ -115,7 +115,12 @@ class _AddTodoPageState extends State<AddTodoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? "Edit Todo" : "Add Todo"),
+        title: Text(
+          isEdit ? "Edit Todo" : "Add Todo",
+          style: const TextStyle(
+            fontFamily: 'Airbnb',
+          ),
+        ),
       ),
       body: Form(
         child: ListView(
@@ -159,11 +164,11 @@ class _AddTodoPageState extends State<AddTodoPage> {
               icon: const Icon(Icons.arrow_drop_down_circle),
               iconSize: 22.0,
               iconEnabledColor: Theme.of(context).primaryColor,
-              items: _priorities.map((String priority) {
+              items: _priorities.map((int priority) {
                 return DropdownMenuItem(
                   value: priority,
                   child: Text(
-                    priority,
+                    priority == 2 ? "LOW" : priority == 1 ? "MEDIUM" : "HIGH",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18.0,
@@ -184,7 +189,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   _priority == null ? 'Please select a priority level' : null,
               onChanged: (value) {
                 setState(() {
-                  _priority = value.toString();
+                  _priority = value!;
                 });
               },
               value: _priority,
@@ -209,18 +214,22 @@ class _AddTodoPageState extends State<AddTodoPage> {
               height: 20,
             ),
             ElevatedButton(
-              onPressed: (){
-                  setState(() {
-                    titleController.text.isEmpty ? _validateTask = true : _validateTask = false;
-                    descriptionController.text.isEmpty ? _validateDesc = true : _validateDesc = false;
-                  });
-                    if(!_validateDesc && !_validateTask && isEdit){
-                      updateData();
-                    }else if(!_validateDesc && !_validateTask && !isEdit){
-                      submitData();
-                    }else {
-                      null;
-                    }
+              onPressed: () {
+                setState(() {
+                  titleController.text.isEmpty
+                      ? _validateTask = true
+                      : _validateTask = false;
+                  descriptionController.text.isEmpty
+                      ? _validateDesc = true
+                      : _validateDesc = false;
+                });
+                if (!_validateDesc && !_validateTask && isEdit) {
+                  updateData();
+                } else if (!_validateDesc && !_validateTask && !isEdit) {
+                  submitData();
+                } else {
+                  null;
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
