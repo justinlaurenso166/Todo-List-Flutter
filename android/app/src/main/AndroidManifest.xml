@@ -1,12 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.my_app">
+    package="com.example.my_app" xmlns:tools="http://schemas.android.com/tools">
    <application
-        android:label="my_app"
+        android:label="TodoListApp"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        tools:replace="android:icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:icon="@mipmap/ic_launcher"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

@@ -86,15 +86,22 @@ class _HistoryState extends State<History> {
           ),
           child: const Center(child: CircularProgressIndicator()),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) => _buildPopupDialog(context),
-              );
-          },
-          backgroundColor: const Color.fromARGB(255, 243, 97, 87),
-          label: const Icon(Icons.delete_forever, size: 25.0, color: Colors.white,),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            if(items.isNotEmpty)...[
+                FloatingActionButton.extended(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) => _buildPopupDialog(context),
+                      );
+                  },
+                  backgroundColor: const Color.fromARGB(255, 243, 97, 87),
+                  label: const Icon(Icons.delete_forever, size: 25.0, color: Colors.white,),
+                )
+            ]
+          ],
         )
       );
   }
@@ -102,11 +109,11 @@ class _HistoryState extends State<History> {
   Widget _buildPopupDialog(
     BuildContext context) {
   return AlertDialog(
-    title: Text("Are you sure want to clear the history ?"),
+    title: const Text("Are you sure want to clear the history ?"),
     content: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
+      children: const <Widget>[
         Text("This action cannot be undone."),
       ],
     ),

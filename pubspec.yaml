@@ -41,6 +41,9 @@ dependencies:
   toast: ^0.1.5
   url_launcher: ^6.0.2
   http: ^0.13.5
+  # awesome_notifications: ^0.7.4+1
+  flutter_local_notifications: ^12.0.4
+  flutter_native_timezone: ^2.0.0
 
 dev_dependencies:
   flutter_test:

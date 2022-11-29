@@ -71,7 +71,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
     final DateTime? date = await showDatePicker(
       context: context,
       initialDate: _date,
-      firstDate: DateTime(2000),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
     if (date != null) {
@@ -281,7 +281,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
     // Get the data from form
     print(body);
     final response = await TodoService.addTodo(body);
-    // // // Show success or fail message based on status
+    // Show success or fail message based on status
     if (response) {
       titleController.text = '';
       descriptionController.text = '';

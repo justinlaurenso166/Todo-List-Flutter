@@ -79,9 +79,6 @@ class _TodoListPageState extends State<TodoListPage> {
                   style: TextStyle(fontSize: 20),
                 ),
                 onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
                   Navigator.pop(context);
                 },
               ),
@@ -107,7 +104,7 @@ class _TodoListPageState extends State<TodoListPage> {
                 ),
                 child: DropdownButton(
                   underline: Container(),
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.sort,
                     color: Colors.white,
                   ),
@@ -120,36 +117,34 @@ class _TodoListPageState extends State<TodoListPage> {
                   }).toList(),
                   onChanged: (Object? value) {
                     var sortResult;
-                    setState((){
-                    isLoading = true;
+                    setState(() {
+                      isLoading = true;
                       if (value == "A-Z") {
                         items.sort((a, b) {
                           return a['todo']
                               .toLowerCase()
                               .compareTo(b['todo'].toLowerCase());
                         });
-                      isLoading = false;
-                      }else if(value == "Z-A"){
+                        isLoading = false;
+                      } else if (value == "Z-A") {
                         items.sort((a, b) {
                           return b['todo']
                               .toLowerCase()
                               .compareTo(a['todo'].toLowerCase());
                         });
                         print(items);
-                      isLoading = false;
-                      }else if(value == "LOW-HIGH"){
+                        isLoading = false;
+                      } else if (value == "LOW-HIGH") {
                         items.sort((a, b) {
                           return b['priority'].compareTo(a['priority']);
                         });
                         isLoading = false;
-                      }
-                      else if(value == "HIGH-LOW"){
-                        items.sort((a,b) {
+                      } else if (value == "HIGH-LOW") {
+                        items.sort((a, b) {
                           return a['priority'].compareTo(b['priority']);
                         });
                         isLoading = false;
-                      }
-                      else{
+                      } else {
                         fetchTodo();
                       }
                     });
@@ -196,12 +191,36 @@ class _TodoListPageState extends State<TodoListPage> {
           ),
           child: const Center(child: CircularProgressIndicator()),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            navigateToAddPage();
-          },
-          backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
-          label: const Icon(Icons.add, size: 25.0),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            FloatingActionButton.extended(
+              heroTag: 'add',
+              onPressed: () {
+                navigateToAddPage();
+              },
+              backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
+              label: const Icon(Icons.add, size: 25.0),
+            ),
+            const Padding(padding: EdgeInsets.fromLTRB(0, 10, 0, 10)),
+            if(items.isNotEmpty)...[
+              FloatingActionButton.extended(
+                heroTag: 'delete',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => _buildPopupDialog(context),
+                  );
+                },
+                backgroundColor: const Color.fromARGB(255, 243, 97, 87),
+                label: const Icon(
+                  Icons.delete_forever,
+                  size: 25.0,
+                  color: Colors.white,
+                ),
+              )
+            ],
+          ],
         ));
   }
 
@@ -267,4 +286,43 @@ class _TodoListPageState extends State<TodoListPage> {
       isLoading = false;
     });
   }
+
+    Future<void> clearAllTask() async {
+      final isCleared = await TodoService.clearAllTask();
+
+      if(isCleared){
+        fetchTodo();
+      }
+  }
+
+  Widget _buildPopupDialog(
+    BuildContext context) {
+  return AlertDialog(
+    title: const Text("Are you sure want to clear all the task ?"),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const <Widget>[
+        Text("This action cannot be undone."),
+      ],
+    ),
+    actions: <Widget>[
+      ElevatedButton(
+        onPressed: () {
+          clearAllTask();
+          Navigator.of(context).pop();
+        },
+        child: const Text('Yes'),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+        child: const Text('No'),
+      ),
+    ],
+  );
+}
+
 }

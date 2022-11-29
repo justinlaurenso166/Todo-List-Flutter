@@ -5,21 +5,28 @@ import 'package:http/http.dart' as http;
 //All api call
 class TodoService {
   static Future<bool> deleteById(String id) async {
-    final url = 'http://localhost:8080/todos/$id';
+    final url = 'http://192.168.0.170:8080/todos/$id';
     final uri = Uri.parse(url);
     final response = await http.delete(uri);
     return response.statusCode == 200;
   }
 
   static Future<bool> clearAllHistory() async {
-    final url = 'http://localhost:8080/todos/clear/completed';
+    final url = 'http://192.168.0.170:8080/todos/clear/completed';
+    final uri = Uri.parse(url);
+    final response = await http.delete(uri);
+    return response.statusCode == 200;
+  }
+
+    static Future<bool> clearAllTask() async {
+    final url = 'http://192.168.0.170:8080/todos/clear/uncompleted';
     final uri = Uri.parse(url);
     final response = await http.delete(uri);
     return response.statusCode == 200;
   }
 
   static Future<List?> fetchTodos() async {
-    final url = 'http://localhost:8080/todos/uncompleted';
+    final url = 'http://192.168.0.170:8080/todos/uncompleted';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
     if (response.statusCode == 200) {
@@ -32,7 +39,7 @@ class TodoService {
   }
 
   static Future<List?> fetchTodosCompleted() async {
-    final url = 'http://localhost:8080/todos/completed';
+    final url = 'http://192.168.0.170:8080/todos/completed';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
     if (response.statusCode == 200) {
@@ -45,7 +52,7 @@ class TodoService {
   }
 
   static Future<bool> updateTodo(String id, Map body) async {
-    final url = 'http://localhost:8080/todos/$id'; //post api
+    final url = 'http://192.168.0.170:8080/todos/$id'; //post api
         final uri = Uri.parse(url);
         final response = await http.patch(
           uri, 
@@ -58,7 +65,7 @@ class TodoService {
   }
 
   static Future<bool> addTodo(Map body) async {
-    final url = 'http://localhost:8080/todos'; //post api
+    final url = 'http://192.168.0.170:8080/todos'; //post api
         final uri = Uri.parse(url);
         final response = await http.post(
           uri, 
