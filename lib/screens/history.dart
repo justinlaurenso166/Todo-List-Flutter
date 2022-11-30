@@ -36,8 +36,8 @@ class _HistoryState extends State<History> {
         appBar: AppBar(
           leading: ElevatedButton(
             onPressed: () { navigateToTodo(); },
-          child: Icon(Icons.arrow_back_outlined),
           style: ElevatedButton.styleFrom(backgroundColor: Color.fromARGB(255, 66, 66, 66)),
+          child: const Icon(Icons.arrow_back_outlined),
           ),
           title: const Text(
             "History",

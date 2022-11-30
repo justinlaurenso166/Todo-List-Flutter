@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:intl/intl.dart';
 
 class PopUpWidget extends StatefulWidget {
   final Map item;
@@ -61,7 +62,8 @@ class _PopUpWidgetState extends State<PopUpWidget> {
               ),
             ],
           )
-        : AlertDialog(
+        : 
+        AlertDialog(
             title: const Text('Are you sure want to delete this task ?'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -70,7 +72,7 @@ class _PopUpWidgetState extends State<PopUpWidget> {
                 Text("Title : ${item['todo']}"),
                 Text("Description : ${item['description']}"),
                 Text(
-                    "Date : ${parsedDate.toString().substring(0, 10)} ${parsedDate.toString().substring(11, 16)}"),
+                    "Date : ${changeFormat(parsedDate)} ${parsedDate.hour}:${formatMinute((parsedDate.minute).toString())}"),
                 Row(
                   children: [
                     const Text(
@@ -104,5 +106,18 @@ class _PopUpWidgetState extends State<PopUpWidget> {
               ),
             ],
           );
+  }
+
+  changeFormat(date) {
+    return DateFormat("MMMEd").format(date);
+  }
+
+  formatMinute(String minute) {
+    if (minute.length <= 1) {
+      minute = "0$minute";
+    } else {
+      minute = minute;
+    }
+    return minute;
   }
 }

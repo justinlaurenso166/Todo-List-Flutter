@@ -296,14 +296,13 @@ class _AddTodoPageState extends State<AddTodoPage> {
   Map get body {
     final todo = titleController.text;
     final description = descriptionController.text;
-    final date = _dateController.text;
     final priority = _priority;
     return {
       "todo": todo,
       "description": description,
       "status": false,
       "priority": priority,
-      "date": isoDate != null ? isoDate : "",
+      "date": isoDate ?? "",
     };
   }
 }

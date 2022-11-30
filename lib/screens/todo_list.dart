@@ -132,7 +132,6 @@ class _TodoListPageState extends State<TodoListPage> {
                               .toLowerCase()
                               .compareTo(a['todo'].toLowerCase());
                         });
-                        print(items);
                         isLoading = false;
                       } else if (value == "LOW-HIGH") {
                         items.sort((a, b) {
@@ -226,7 +225,7 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Future<void> navigateToTodo() async {
     final route = MaterialPageRoute(
-      builder: (context) => TodoListPage(),
+      builder: (context) => const TodoListPage(),
     );
     await Navigator.push(context, route);
     setState(() {
@@ -237,7 +236,7 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Future<void> navigateToAddPage() async {
     final route = MaterialPageRoute(
-      builder: (context) => AddTodoPage(),
+      builder: (context) => const AddTodoPage(),
     );
     await Navigator.push(context, route);
     setState(() {
