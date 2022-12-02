@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:http/http.dart' as http;
+import 'package:todo_list/screens/splash_screen.dart';
 import 'package:todo_list/screens/todo_list.dart';
 import 'package:todo_list/services/todo_service.dart';
 import 'package:intl/intl.dart';
@@ -168,7 +169,11 @@ class _AddTodoPageState extends State<AddTodoPage> {
                 return DropdownMenuItem(
                   value: priority,
                   child: Text(
-                    priority == 2 ? "LOW" : priority == 1 ? "MEDIUM" : "HIGH",
+                    priority == 2
+                        ? "LOW"
+                        : priority == 1
+                            ? "MEDIUM"
+                            : "HIGH",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18.0,
@@ -215,6 +220,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
             ),
             ElevatedButton(
               onPressed: () {
+                //check the title and description is empty or not
                 setState(() {
                   titleController.text.isEmpty
                       ? _validateTask = true
@@ -251,6 +257,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
     );
   }
 
+  // Navigate To TodoList Page
   navigateToDoPage() async {
     var duration = const Duration(seconds: 3);
     return Timer(duration, () {
@@ -260,6 +267,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
     });
   }
 
+  // Update the data to database
   Future<void> updateData() async {
     final todo = widget.todo;
     if (todo == null) {
@@ -277,6 +285,14 @@ class _AddTodoPageState extends State<AddTodoPage> {
     }
   }
 
+  navigateToSplashScreen() {
+    final route = MaterialPageRoute(
+      builder: (context) => const SplashScreen(type: "submit",),
+    );
+    Navigator.push(context, route);
+  }
+
+  // Submit data to database
   Future<void> submitData() async {
     // Get the data from form
     print(body);
@@ -287,12 +303,15 @@ class _AddTodoPageState extends State<AddTodoPage> {
       descriptionController.text = '';
       _dateController.text = '';
       _priority = _priorities[0];
-      showSuccessMessage(context, message: 'Success');
+      // showSuccessMessage(context, message: 'Success');
+      navigateToSplashScreen();
     } else {
       showErrorMessage(context, message: 'Failed');
     }
   }
 
+
+  // Store the TextField value in here
   Map get body {
     final todo = titleController.text;
     final description = descriptionController.text;

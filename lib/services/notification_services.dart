@@ -48,7 +48,7 @@ class NotificationsServices {
   }
 
   // for debug
-  print(_convertTime(date));
+  // print(_convertTime(date));
   print("set");
 
     await _flutterLocalNotificationsPlugin.zonedSchedule(

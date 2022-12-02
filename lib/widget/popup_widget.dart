@@ -40,7 +40,7 @@ class _PopUpWidgetState extends State<PopUpWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(widget.item['todo']),
+                Text("Task Name : ${widget.item['todo']}"),
               ],
             ),
             actions: <Widget>[
@@ -69,7 +69,7 @@ class _PopUpWidgetState extends State<PopUpWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text("Title : ${item['todo']}"),
+                Text("Task Name : ${item['todo']}"),
                 Text("Description : ${item['description']}"),
                 Text(
                     "Date : ${changeFormat(parsedDate)} ${parsedDate.hour}:${formatMinute((parsedDate.minute).toString())}"),

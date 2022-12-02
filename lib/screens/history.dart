@@ -36,7 +36,7 @@ class _HistoryState extends State<History> {
         appBar: AppBar(
           leading: ElevatedButton(
             onPressed: () { navigateToTodo(); },
-          style: ElevatedButton.styleFrom(backgroundColor: Color.fromARGB(255, 66, 66, 66)),
+          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 66, 66, 66)),
           child: const Icon(Icons.arrow_back_outlined),
           ),
           title: const Text(
@@ -138,7 +138,7 @@ class _HistoryState extends State<History> {
 
   Future<void> navigateToTodo() async {
     final route = MaterialPageRoute(
-      builder: (context) => TodoListPage(),
+      builder: (context) => const TodoListPage(),
     );
     await Navigator.push(context, route);
     setState(() {

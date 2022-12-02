@@ -70,7 +70,7 @@ class _TodoCardState extends State<TodoCard> {
             ),
             title: Text(
               widget.item['todo'],
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 18),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,16 +230,19 @@ class _TodoCardState extends State<TodoCard> {
       setState(() {
         widget.item['notification'] = !widget.item['notification'];
       });
-      showSuccessMessage(context, message: "Successfully added a notification on this task");
-      updateData();
 
       if (widget.item['notification']) {
+      showSuccessMessage(context, message: "Successfully added a notification on this task");
+      updateData();
         notificationsServices.scheduleNotification(
             index,
             "Reminder for your task",
-            "Task Name : ${item['description']}",
+            "Task Name : ${item['todo']}",
             item['date']);
       } else {
+        widget.item['notification'] = false;
+        updateData();
+        showSuccessMessage(context, message: "Successfully canceled a notification on this task");
         notificationsServices.cancelNotification(index);
       }
   }

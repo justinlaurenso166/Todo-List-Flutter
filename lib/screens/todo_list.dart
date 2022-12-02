@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:todo_list/screens/history.dart';
 import 'package:todo_list/services/todo_service.dart';
 import 'package:todo_list/widget/todo_card_stful.dart';
+import 'package:todo_list/widget/drawer.dart';
 import '../utils/snackbar_helpers.dart';
 
 class TodoListPage extends StatefulWidget {
@@ -20,14 +21,19 @@ class TodoListPage extends StatefulWidget {
 }
 
 class _TodoListPageState extends State<TodoListPage> {
+  //loading status
   bool isLoading = true;
   List items = [];
+
+  // List for Sorting
   List<String> dropDown = <String>[
     "Default",
     "A-Z",
     "Z-A",
     "LOW-HIGH",
-    "HIGH-LOW"
+    "HIGH-LOW",
+    "DATE ASC",
+    "DATE DESC"
   ];
 
   @override
@@ -39,52 +45,7 @@ class _TodoListPageState extends State<TodoListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              const DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Colors.black26,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "TODO LIST",
-                      style: TextStyle(
-                        fontSize: 30,
-                        letterSpacing: 5,
-                        color: Color.fromRGBO(255, 212, 1, 1),
-                      ),
-                    ),
-                  )),
-              ListTile(
-                leading: const Icon(Icons.history),
-                title: const Text(
-                  'History',
-                  style: TextStyle(fontSize: 20),
-                ),
-                onTap: () {
-                  // Update the state of the app
-                  final route = MaterialPageRoute(
-                    builder: (context) => History(),
-                  );
-                  Navigator.pop(context);
-                  Navigator.push(context, route);
-                  // Then close the drawer
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text(
-                  'Settings',
-                  style: TextStyle(fontSize: 20),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
+        drawer: const DrawerWidget(),
         appBar: AppBar(
             title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -96,7 +57,9 @@ class _TodoListPageState extends State<TodoListPage> {
                   fontFamily: 'Airbnb',
                   letterSpacing: 1.5),
             ),
+            //Sort By
             Theme(
+                // Make dropdown transparent when click
                 data: ThemeData(
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
@@ -108,13 +71,13 @@ class _TodoListPageState extends State<TodoListPage> {
                     Icons.sort,
                     color: Colors.white,
                   ),
-                  // value: selectedValue,
                   items: dropDown.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList(),
+                  // Sorting items when choose the option
                   onChanged: (Object? value) {
                     var sortResult;
                     setState(() {
@@ -141,6 +104,18 @@ class _TodoListPageState extends State<TodoListPage> {
                       } else if (value == "HIGH-LOW") {
                         items.sort((a, b) {
                           return a['priority'].compareTo(b['priority']);
+                        });
+                        isLoading = false;
+                      } else if (value == "DATE ASC") {
+                        items.sort((a, b) {
+                          return DateTime.parse(a['date'])
+                              .compareTo(DateTime.parse(b['date']));
+                        });
+                        isLoading = false;
+                      } else if (value == "DATE DESC") {
+                        items.sort((a, b) {
+                          return DateTime.parse(b['date'])
+                              .compareTo(DateTime.parse(a['date']));
                         });
                         isLoading = false;
                       } else {
@@ -193,22 +168,26 @@ class _TodoListPageState extends State<TodoListPage> {
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            FloatingActionButton.extended(
-              heroTag: 'add',
-              onPressed: () {
-                navigateToAddPage();
-              },
-              backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
-              label: const Icon(Icons.add, size: 25.0),
-            ),
-            const Padding(padding: EdgeInsets.fromLTRB(0, 10, 0, 10)),
-            if(items.isNotEmpty)...[
+            if(!isLoading)...[
+              FloatingActionButton.extended(
+                heroTag: 'add',
+                onPressed: () {
+                  navigateToAddPage();
+                },
+                backgroundColor: const Color.fromRGBO(255, 212, 1, 1),
+                label: const Icon(Icons.add, size: 25.0),
+              ),
+              const Padding(padding: EdgeInsets.fromLTRB(0, 10, 0, 10)),
+            ],
+            // If item is not empty then show button to clear all task
+            if (items.isNotEmpty && !isLoading) ...[
               FloatingActionButton.extended(
                 heroTag: 'delete',
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (BuildContext context) => _buildPopupDialog(context),
+                    builder: (BuildContext context) =>
+                        _buildPopupDialog(context),
                   );
                 },
                 backgroundColor: const Color.fromARGB(255, 243, 97, 87),
@@ -223,17 +202,7 @@ class _TodoListPageState extends State<TodoListPage> {
         ));
   }
 
-  Future<void> navigateToTodo() async {
-    final route = MaterialPageRoute(
-      builder: (context) => const TodoListPage(),
-    );
-    await Navigator.push(context, route);
-    setState(() {
-      isLoading = true;
-    });
-    fetchTodo();
-  }
-
+  //Navigate to Add Page
   Future<void> navigateToAddPage() async {
     final route = MaterialPageRoute(
       builder: (context) => const AddTodoPage(),
@@ -243,8 +212,9 @@ class _TodoListPageState extends State<TodoListPage> {
       isLoading = true;
     });
     fetchTodo();
-  }
-
+    }
+  
+  //Navigate to Edit Page
   Future<void> navigateToEditPage(Map item) async {
     final route = MaterialPageRoute(
       builder: (context) => AddTodoPage(todo: item),
@@ -256,6 +226,7 @@ class _TodoListPageState extends State<TodoListPage> {
     fetchTodo();
   }
 
+  //Delete todo by Id
   Future<void> deleteById(String id) async {
     //Delete the task
     final isSuccess = await TodoService.deleteById((id));
@@ -270,6 +241,7 @@ class _TodoListPageState extends State<TodoListPage> {
     }
   }
 
+  //Fetch all todo 
   Future<void> fetchTodo() async {
     final response = await TodoService.fetchTodos();
     if (response != null) {
@@ -286,42 +258,42 @@ class _TodoListPageState extends State<TodoListPage> {
     });
   }
 
-    Future<void> clearAllTask() async {
-      final isCleared = await TodoService.clearAllTask();
+  //Clear All Uncompleted Task
+  Future<void> clearAllTask() async {
+    final isCleared = await TodoService.clearAllTask();
 
-      if(isCleared){
-        fetchTodo();
-      }
+    if (isCleared) {
+      fetchTodo();
+    }
   }
 
-  Widget _buildPopupDialog(
-    BuildContext context) {
-  return AlertDialog(
-    title: const Text("Are you sure want to clear all the task ?"),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: const <Widget>[
-        Text("This action cannot be undone."),
+  // PopUp Dialog if want to clear all the uncompleted task
+  Widget _buildPopupDialog(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Are you sure want to clear all the task ?"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const <Widget>[
+          Text("This action cannot be undone."),
+        ],
+      ),
+      actions: <Widget>[
+        ElevatedButton(
+          onPressed: () {
+            clearAllTask();
+            Navigator.of(context).pop();
+          },
+          child: const Text('Yes'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          child: const Text('No'),
+        ),
       ],
-    ),
-    actions: <Widget>[
-      ElevatedButton(
-        onPressed: () {
-          clearAllTask();
-          Navigator.of(context).pop();
-        },
-        child: const Text('Yes'),
-      ),
-      ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-        child: const Text('No'),
-      ),
-    ],
-  );
-}
-
+    );
+  }
 }

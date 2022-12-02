@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       title: "Flutter Todo List",
       debugShowCheckedModeBanner: false,
       theme: ThemeClass.darkTheme,
-      home: const SplashScreen(),
+      home: const SplashScreen(type: "default",),
     );
   }
 }
