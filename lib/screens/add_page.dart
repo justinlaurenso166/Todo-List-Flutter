@@ -24,20 +24,36 @@ class AddTodoPage extends StatefulWidget {
 }
 
 class _AddTodoPageState extends State<AddTodoPage> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
 
-  bool isEdit = false;
   final List<int> _priorities = [2, 1, 0];
   late int _priority = _priorities[0];
-  DateTime _date = DateTime.now();
-  final TextEditingController _dateController = TextEditingController();
-  final DateFormat _dateFormatter = DateFormat("yyyy-MM-dd HH:mm");
-  bool isLoading = true;
   List items = [];
-  String? isoDate;
+
+  bool isEdit = false;
+  bool isLoading = true;
   bool _validateTask = false;
   bool _validateDesc = false;
+  
+  DateTime _date = DateTime.now();
+  final DateFormat _dateFormatter = DateFormat("yyyy-MM-dd HH:mm");
+  String? isoDate;
+
+   // Store the TextField value in here
+  Map get body {
+    final todo = titleController.text;
+    final description = descriptionController.text;
+    final priority = _priority;
+    return {
+      "todo": todo,
+      "description": description,
+      "status": false,
+      "priority": priority,
+      "date": isoDate ?? "",
+    };
+  }
 
   @override
   void initState() {
@@ -308,20 +324,5 @@ class _AddTodoPageState extends State<AddTodoPage> {
     } else {
       showErrorMessage(context, message: 'Failed');
     }
-  }
-
-
-  // Store the TextField value in here
-  Map get body {
-    final todo = titleController.text;
-    final description = descriptionController.text;
-    final priority = _priority;
-    return {
-      "todo": todo,
-      "description": description,
-      "status": false,
-      "priority": priority,
-      "date": isoDate ?? "",
-    };
   }
 }

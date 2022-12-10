@@ -62,8 +62,7 @@ class _PopUpWidgetState extends State<PopUpWidget> {
               ),
             ],
           )
-        : 
-        AlertDialog(
+        : AlertDialog(
             title: const Text('Are you sure want to delete this task ?'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
