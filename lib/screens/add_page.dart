@@ -30,7 +30,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
 
   final List<int> _priorities = [2, 1, 0];
   late int _priority = _priorities[0];
-  List items = [];
+  // List items = [];
 
   bool isEdit = false;
   bool isLoading = true;

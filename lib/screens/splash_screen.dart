@@ -31,8 +31,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 image: AssetImage(
                   "assets/images/TodoList.png",
                 ),
-                // width: 200,
-                // height: 200,
               ),
             ),
           )
